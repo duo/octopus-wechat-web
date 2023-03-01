@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	VENDOR_SEP = ";"
+	VENDOR_SEP    = ";"
+	REMOTE_PREFIX = "remote:"
 )
 
 type OctopusMessage struct {
@@ -79,6 +80,9 @@ type AppData struct {
 	Description string `json:"desc,omitempty"`
 	Source      string `json:"source,omitempty"`
 	URL         string `json:"url,omitempty"`
+
+	Content string               `json:"raw,omitempty"`
+	Blobs   map[string]*BlobData `json:"blobs,omitempty"`
 }
 
 type LocationData struct {
@@ -154,6 +158,10 @@ func (o *OctopusResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
+	if o.Error != nil {
+		return nil
+	}
+
 	switch o.Type {
 	case RespEvent:
 		var event *OctopusEvent
@@ -189,7 +197,7 @@ func (o *OctopusEvent) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		o.Data = photos
-	case EventAudio, EventVideo, EventFile:
+	case EventSticker, EventAudio, EventVideo, EventFile:
 		var blob *BlobData
 		if err := json.Unmarshal(rawMsg, &blob); err != nil {
 			return err
@@ -202,11 +210,11 @@ func (o *OctopusEvent) UnmarshalJSON(data []byte) error {
 		}
 		o.Data = location
 	case EventApp:
-		var link *AppData
-		if err := json.Unmarshal(rawMsg, &link); err != nil {
+		var app *AppData
+		if err := json.Unmarshal(rawMsg, &app); err != nil {
 			return err
 		}
-		o.Data = link
+		o.Data = app
 	case EventSync:
 		var chats []*Chat
 		if err := json.Unmarshal(rawMsg, &chats); err != nil {
@@ -249,6 +257,7 @@ const (
 	EventSystem
 	EventSync
 	EventObserve
+	EventSticker
 )
 
 type MessageType int
@@ -324,6 +333,8 @@ func (t EventType) String() string {
 		return "sync"
 	case EventObserve:
 		return "observe"
+	case EventSticker:
+		return "sticker"
 	default:
 		return "unknown"
 	}

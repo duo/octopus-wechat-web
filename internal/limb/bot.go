@@ -190,6 +190,9 @@ func (b *Bot) processOcotopusEvent(event *common.OctopusEvent) (*common.OctopusE
 	case common.EventPhoto:
 		blob := event.Data.([]*common.BlobData)[0]
 		sent, err = b.self.SendImageToFriend(friend, bytes.NewReader(blob.Binary))
+	case common.EventSticker:
+		blob := event.Data.(*common.BlobData)
+		sent, err = b.self.SendImageToFriend(friend, bytes.NewReader(blob.Binary))
 	case common.EventVideo:
 		blob := event.Data.(*common.BlobData)
 		sent, err = b.self.SendVideoToFriend(friend, bytes.NewReader(blob.Binary))
@@ -241,8 +244,8 @@ func (b *Bot) processWechatMessage(msg *openwechat.Message) {
 			event.Type = common.EventText
 			event.Content = "[表情下载失败]"
 		} else {
-			event.Type = common.EventPhoto
-			event.Data = []*common.BlobData{blob}
+			event.Type = common.EventSticker
+			event.Data = blob
 		}
 	case openwechat.MsgTypeVoice:
 		if dataErr != nil {
@@ -304,8 +307,8 @@ func (b *Bot) processWechatMessage(msg *openwechat.Message) {
 		case openwechat.AppMsgTypeEmoji:
 			blob := downloadSticker(b, msg.Content)
 			if blob != nil {
-				event.Type = common.EventPhoto
-				event.Data = []*common.BlobData{blob}
+				event.Type = common.EventSticker
+				event.Data = blob
 				event.Content = ""
 			} else {
 				event.Type = common.EventText

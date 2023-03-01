@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/antchfx/xmlquery v1.3.15
-	github.com/duo/wsc v0.0.0-20230222025311-77707f7341b5
+	github.com/duo/wsc v0.0.0-20230222133338-63777e3dc7a8
 	github.com/eatmoreapple/openwechat v1.4.1
 	github.com/gabriel-vasile/mimetype v1.4.1
 	github.com/sirupsen/logrus v1.9.0
